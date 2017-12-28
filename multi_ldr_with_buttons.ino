@@ -89,6 +89,7 @@ void playNotes()
         int velocity = constrain(map(tglOn, threshold, 1023, 0, 127), 0, 127);
         noteOn(0, notePitches[i], velocity);
         MidiUSB.flush();
+        delay(50);
       }
       else
       {
