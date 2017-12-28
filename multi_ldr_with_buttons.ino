@@ -17,7 +17,7 @@ pitchC5, pitchE5, pitchG5,
 pitchC7, pitchE7, pitchG7};
 
 const int sensors[NUM_INPUTS] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11};
-byte velocities[NUM_INPUTS];
+int velocities[NUM_INPUTS];
 uint16_t pressedSensors = 0x00;
 uint16_t previousSensors = 0x00;
 
@@ -54,10 +54,12 @@ void readSensors()
   for (int i = 0; i < NUM_INPUTS; i++)
   {
     int reading = analogRead(sensors[i]);
-    delay(50);
+    delay(10);
     if (reading > threshold)
     {
-      velocities[i] = constrain(map(reading, threshold, 1023, 0, 127), 0, 127);
+      int reading2 = analogRead(sensors[i]);
+      delay(10);
+      velocities[i] = constrain(map(reading2, threshold, 1023, 0, 127), 0, 127);
       bitWrite(pressedSensors, i, 1);
     }
     else
@@ -66,11 +68,11 @@ void readSensors()
       bitWrite(pressedSensors, i, 0);
     }
   }
-  Serial.println("Note velocities: " + String(velocities[0]) + ", " + String(velocities[1]) + ", " + 
-  String(velocities[2]) + ", " + String(velocities[3]) + ", " + String(velocities[4]) + ", " + 
-  String(velocities[5]) + ", " + String(velocities[6]) + ", " + String(velocities[7]) + ", " + 
-  String(velocities[8]) + ", " + String(velocities[9]) + ", " + String(velocities[10]) + ", " + 
-  String(velocities[11]) + ", ");
+//  Serial.println("Note velocities: " + String(velocities[0]) + ", " + String(velocities[1]) + ", " + 
+//  String(velocities[2]) + ", " + String(velocities[3]) + ", " + String(velocities[4]) + ", " + 
+//  String(velocities[5]) + ", " + String(velocities[6]) + ", " + String(velocities[7]) + ", " + 
+//  String(velocities[8]) + ", " + String(velocities[9]) + ", " + String(velocities[10]) + ", " + 
+//  String(velocities[11]));
 }
 
 void readButtons()
