@@ -17,6 +17,7 @@ pitchC5, pitchE5, pitchG5,
 pitchC7, pitchE7, pitchG7};
 
 const int sensors[NUM_INPUTS] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11};
+byte velocities[NUM_INPUTS];
 uint16_t pressedSensors = 0x00;
 uint16_t previousSensors = 0x00;
 
@@ -52,14 +53,24 @@ void readSensors()
 {
   for (int i = 0; i < NUM_INPUTS; i++)
   {
-    if (analogRead(sensors[i]) > threshold)
+    int reading = analogRead(sensors[i]);
+    delay(50);
+    if (reading > threshold)
     {
+      velocities[i] = constrain(map(reading, threshold, 1023, 0, 127), 0, 127);
       bitWrite(pressedSensors, i, 1);
-      delay(50);
     }
     else
+    {
+      velocities[i] = 0;
       bitWrite(pressedSensors, i, 0);
+    }
   }
+  Serial.println("Note velocities: " + String(velocities[0]) + ", " + String(velocities[1]) + ", " + 
+  String(velocities[2]) + ", " + String(velocities[3]) + ", " + String(velocities[4]) + ", " + 
+  String(velocities[5]) + ", " + String(velocities[6]) + ", " + String(velocities[7]) + ", " + 
+  String(velocities[8]) + ", " + String(velocities[9]) + ", " + String(velocities[10]) + ", " + 
+  String(velocities[11]) + ", ");
 }
 
 void readButtons()
@@ -84,10 +95,7 @@ void playNotes()
       if (bitRead(pressedSensors, i))
       {
         bitWrite(previousSensors, i , 1);
-        int tglOn = analogRead(sensors[i]);
-//        Serial.println("analogRead pin " + String(sensors[i]) + ": " + String(tglOn));
-        int velocity = constrain(map(tglOn, threshold, 1023, 0, 127), 0, 127);
-        noteOn(0, notePitches[i], velocity);
+        noteOn(0, notePitches[i], velocities[i]);
         MidiUSB.flush();
       }
       else
