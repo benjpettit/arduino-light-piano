@@ -3,8 +3,6 @@
 #define NUM_INPUTS 12
 #define NUM_BUTTONS 3
 
-int threshold = 0;
-
 // pentatonic
 //const byte notePitches[NUM_INPUTS] = {pitchC2, pitchD2, pitchE2, pitchG2, pitchA2, pitchC3,
 //                                pitchD3, pitchE3, pitchG3, pitchA3, pitchC4, pitchD4};
@@ -20,6 +18,8 @@ const int sensors[NUM_INPUTS] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A1
 int velocities[NUM_INPUTS];
 uint16_t pressedSensors = 0x00;
 uint16_t previousSensors = 0x00;
+int threshold;
+int sensorReading;
 
 // Button settings
 const byte buttonNotePitches[NUM_BUTTONS] = {pitchC2, pitchC1, pitchC3};
@@ -32,11 +32,10 @@ void setup() {
   // put your setup code here, to run once:
   for (int i = 0; i < NUM_INPUTS; i++)
   {
-    pinMode(sensors[i], INPUT);
-    int initialReading = analogRead(sensors[i]);
-    if (initialReading + 32 > threshold)
+    sensorReading = readAnalogPin(sensors[i]);
+    if (sensorReading + 32 > threshold)
     {
-      threshold = initialReading + 32;
+      threshold = sensorReading + 32;
     }
   }
   Serial.println("Starting. Light threshold set at " + threshold);
@@ -53,13 +52,10 @@ void readSensors()
 {
   for (int i = 0; i < NUM_INPUTS; i++)
   {
-    int reading = analogRead(sensors[i]);
-    delay(10);
-    if (reading > threshold)
+    sensorReading = readAnalogPin(sensors[i]);
+    if (sensorReading > threshold)
     {
-      int reading2 = analogRead(sensors[i]);
-      delay(10);
-      velocities[i] = constrain(map(reading2, threshold, 1023, 0, 127), 0, 127);
+      velocities[i] = constrain(map(sensorReading, threshold, 1023, 0, 127), 0, 127);
       bitWrite(pressedSensors, i, 1);
     }
     else
@@ -130,6 +126,13 @@ void playButtonNotes()
       }
     }
   }
+}
+
+int readAnalogPin(int pin) {
+  delay(10);
+  analogRead(pin);
+  delay(10);
+  return analogRead(pin);
 }
 
 void noteOn(byte channel, byte pitch, byte velocity) {
